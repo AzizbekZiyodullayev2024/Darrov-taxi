@@ -83,7 +83,13 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/{partner}', [PartnerController::class, 'show']);
         Route::put('/{partner}', [PartnerController::class, 'update']);
         Route::post('{partner}',[PartnerController::class,'updateImage']);
-
+        Route::get('/statistics/daily', [PartnerController::class, 'getDailyStats']);
+        Route::get('/statistics/monthly', [PartnerController::class, 'getMonthlyStats']);
+        Route::get('/statistics/overall', [PartnerController::class, 'getOverallStats']);
+        Route::get('/statistics/me', [PartnerController::class, 'getMyStats']);
+        Route::get('/statistics/me/daily', [PartnerController::class, 'getMyDailyStats']);
+        Route::get('/statistics/me/monthly', [PartnerController::class, 'getMyMonthlyStats']);
+        Route::get('/statistics/me/yearly', [PartnerController::class, 'getMyYearlyStats']);
     });
 
     Route::prefix('/operators')->group(function () {
