@@ -1,0 +1,60 @@
+[2024-11-28 02:30:09][79] Processing: App\Jobs\SendMessageJob
+[2024-11-28 02:30:09][79] Processed:  App\Jobs\SendMessageJob
+[2024-11-28 02:31:55][80] Processing: App\Jobs\SendMessageJob
+[2024-11-28 02:31:55][80] Processed:  App\Jobs\SendMessageJob
+[2024-11-28 02:33:03][81] Processing: App\Jobs\SendMessageJob
+[2024-11-28 02:33:03][81] Processed:  App\Jobs\SendMessageJob
+[2024-11-28 04:00:51][82] Processing: App\Jobs\SendMessageJob
+[2024-11-28 04:00:51][82] Processed:  App\Jobs\SendMessageJob
+
+   Symfony\Component\Process\Exception\ProcessSignaledException 
+
+  The process has been signaled with signal "1".
+
+  at vendor/symfony/process/Process.php:441
+    437▕             usleep(1000);
+    438▕         }
+    439▕ 
+    440▕         if ($this->processInformation['signaled'] && $this->processInformation['termsig'] !== $this->latestSignal) {
+  ➜ 441▕             throw new ProcessSignaledException($this);
+    442▕         }
+    443▕ 
+    444▕         return $this->exitcode;
+    445▕     }
+
+      [2m+17 vendor frames [22m
+  18  artisan:37
+      Illuminate\Foundation\Console\Kernel::handle()
+[2024-11-28 15:42:22][83] Processing: App\Jobs\SendMessageJob
+[2024-11-28 15:42:22][83] Processed:  App\Jobs\SendMessageJob
+[2024-11-28 15:42:23][84] Processing: App\Jobs\SendMessageJob
+[2024-11-28 15:42:23][84] Processed:  App\Jobs\SendMessageJob
+[2024-11-28 15:42:23][85] Processing: App\Jobs\SendMessageJob
+[2024-11-28 15:42:23][85] Processed:  App\Jobs\SendMessageJob
+[2024-11-28 15:42:23][86] Processing: App\Jobs\SendMessageJob
+[2024-11-28 15:42:23][86] Processed:  App\Jobs\SendMessageJob
+[2024-11-28 16:14:19][87] Processing: App\Jobs\SendMessageJob
+[2024-11-28 16:14:19][87] Processed:  App\Jobs\SendMessageJob
+[2024-11-28 16:43:37][88] Processing: App\Jobs\SendMessageJob
+[2024-11-28 16:43:37][88] Processed:  App\Jobs\SendMessageJob
+[2024-11-28 16:46:38][89] Processing: App\Jobs\SendMessageJob
+[2024-11-28 16:46:38][89] Processed:  App\Jobs\SendMessageJob
+
+   Symfony\Component\Process\Exception\ProcessSignaledException 
+
+  The process has been signaled with signal "1".
+
+  at vendor/symfony/process/Process.php:441
+    437▕             usleep(1000);
+    438▕         }
+    439▕ 
+    440▕         if ($this->processInformation['signaled'] && $this->processInformation['termsig'] !== $this->latestSignal) {
+  ➜ 441▕             throw new ProcessSignaledException($this);
+    442▕         }
+    443▕ 
+    444▕         return $this->exitcode;
+    445▕     }
+
+      [2m+17 vendor frames [22m
+  18  artisan:37
+      Illuminate\Foundation\Console\Kernel::handle()

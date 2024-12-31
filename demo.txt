@@ -1,0 +1,8 @@
+nohup: ignoring input
+[2024-10-25 16:09:40][7] Processing: App\Jobs\SendMessageJob
+[2024-10-25 16:09:40][7] Processed:  App\Jobs\SendMessageJob
+[2024-10-30 00:05:46][9] Processing: App\Jobs\SendMessageJob
+[2024-10-30 00:05:46][9] Processed:  App\Jobs\SendMessageJob
+[2024-10-30 00:36:23][10] Processing: App\Jobs\SendMessageJob
+[2024-10-30 00:36:23][10] Processed:  App\Jobs\SendMessageJo[2024-10-30 10:33:29][11] Processing: App\Jobs\SendMessageJob
+[2024-10-30 10:33:29][11] Processed:  App\Jobs\SendMessageJob

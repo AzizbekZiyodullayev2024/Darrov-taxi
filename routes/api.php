@@ -47,6 +47,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('partner/stat',[PartnerController::class,'statPartner']);
         Route::get('partner/overall',[PartnerController::class,'statPartnerOverall']);
         Route::post('drivers/{driver}/activate', [DriverController::class, 'activate']);
+        Route::get('partners/{partner}/pending-orders', [OrderController::class, 'getPendingOrders']);
+        Route::post('orders/{order}/cancel', [OrderController::class, 'cancelOrder']);
     });
 
     Route::prefix('/drivers')->group(function () {

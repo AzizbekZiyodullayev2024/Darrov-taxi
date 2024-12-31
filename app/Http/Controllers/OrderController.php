@@ -163,4 +163,46 @@ class OrderController extends Controller
 
         return $this->fail([], 'Invalid status');
     }
+    public function getPendingOrders(Partner $partner)
+    {
+        return $this->success([
+            'orders' => Order::query()
+                ->where('partner_id', $partner->id)
+                ->whereNotIn('status', [-1, 4]) // Exclude cancelled (-1) and delivered (4) orders
+                ->with(['customer', 'items.product', 'driver'])
+                ->orderByDesc('created_at')
+                ->get()
+        ]);
+    }
+
+    public function cancelOrder(Order $order)
+    {
+        // Check if order can be cancelled (not delivered or already cancelled)
+        if (in_array($order->status, [-1, 4])) {
+            return $this->fail([], 'Order cannot be cancelled');
+        }
+
+        DB::transaction(function () use ($order) {
+            // Restore product quantities
+            foreach ($order->items as $item) {
+                $product = Product::query()->where('id', $item->product_id)->first();
+                $product->quantity += $item->quantity;
+                if ($product->quantity > 0) {
+                    $product->status = 1;
+                }
+                $product->save();
+            }
+
+            // Create history record
+            History::create([
+                'order_id' => $order->id,
+                'status' => -1
+            ]);
+
+            // Update order status
+            $order->update(['status' => -1]);
+        });
+
+        return $this->success(['order' => $order]);
+    }
 }
