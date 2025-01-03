@@ -137,20 +137,44 @@ class PartnerController extends Controller
                 return $this->error('Invalid date format. Use dd.mm.yyyy');
             }
         }
+
+        // Get stats
+        $stats = History::query()
+            ->join('orders', 'histories.order_id', '=', 'orders.id')
+            ->where('orders.partner_id', $partnerId)
+            ->where('histories.status', 2)
+            ->whereDate('histories.created_at', $date)
+            ->select(
+                DB::raw("'" . $date . "' as date"),
+                DB::raw('COUNT(*) as total_orders'),
+                DB::raw('SUM(orders.total_price - orders.delivery_price) as total_earnings'),
+                DB::raw('AVG(orders.total_price - orders.delivery_price) as average_order_value')
+            )
+            ->first();
+
+        // Get orders with pagination
+        $orders = History::query()
+            ->join('orders', 'histories.order_id', '=', 'orders.id')
+            ->where('orders.partner_id', $partnerId)
+            ->where('histories.status', 2)
+            ->whereDate('histories.created_at', $date)
+            ->with(['order.customer']) // Assuming you have these relationships set up
+            ->when(request()->has('search'), function($query) {
+                $search = request()->get('search');
+                return $query->where(function($q) use ($search) {
+                    $q->whereHas('order.customer', function($q) use ($search) {
+                        $q->where('name', 'like', "%{$search}%")
+                          ->orWhere('phone', 'like', "%{$search}%");
+                    })
+                    ->orWhere('orders.id', 'like', "%{$search}%");
+                });
+            })
+            ->orderBy('histories.created_at', 'desc')
+            ->paginate(request()->get('limit', 15));
         
         return $this->success([
-            'daily_stats' => History::query()
-                ->join('orders', 'histories.order_id', '=', 'orders.id')
-                ->where('orders.partner_id', $partnerId)
-                ->where('histories.status', 2)
-                ->whereDate('histories.created_at', $date)
-                ->select(
-                    DB::raw("'" . $date . "' as date"),
-                    DB::raw('COUNT(*) as total_orders'),
-                    DB::raw('SUM(orders.total_price - orders.delivery_price) as total_earnings'),
-                    DB::raw('AVG(orders.total_price - orders.delivery_price) as average_order_value')
-                )
-                ->first()
+            'daily_stats' => $stats,
+            'orders' => $orders
         ]);
     }
 
@@ -230,6 +254,7 @@ class PartnerController extends Controller
                 return $this->error('From date cannot be greater than to date');
             }
 
+            // Get stats
             $stats = History::query()
                 ->join('orders', 'histories.order_id', '=', 'orders.id')
                 ->where('orders.partner_id', $partnerId)
@@ -244,6 +269,26 @@ class PartnerController extends Controller
                 )
                 ->first();
 
+            // Get orders with pagination
+            $orders = History::query()
+                ->join('orders', 'histories.order_id', '=', 'orders.id')
+                ->where('orders.partner_id', $partnerId)
+                ->where('histories.status', 2)
+                ->whereBetween('histories.created_at', [$fromDate, $toDate])
+                ->with(['order.customer']) // Assuming you have these relationships set up
+                ->when(request()->has('search'), function($query) {
+                    $search = request()->get('search');
+                    return $query->where(function($q) use ($search) {
+                        $q->whereHas('order.customer', function($q) use ($search) {
+                            $q->where('name', 'like', "%{$search}%")
+                              ->orWhere('phone', 'like', "%{$search}%");
+                        })
+                        ->orWhere('orders.id', 'like', "%{$search}%");
+                    });
+                })
+                ->orderBy('histories.created_at', 'desc')
+                ->paginate(request()->get('limit', 15));
+
             return $this->success([
                 'range_stats' => [
                     'from_date' => $fromDate->format('Y-m-d'),
@@ -253,7 +298,8 @@ class PartnerController extends Controller
                     'average_order_value' => $stats->average_order_value,
                     'period_start' => $stats->period_start,
                     'period_end' => $stats->period_end
-                ]
+                ],
+                'orders' => $orders
             ]);
         } catch (\Exception $e) {
             \Log::error('Range stats error: ' . $e->getMessage());
