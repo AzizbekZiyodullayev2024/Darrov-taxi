@@ -90,6 +90,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/statistics/me/daily', [PartnerController::class, 'getMyDailyStats']);
         Route::get('/statistics/me/monthly', [PartnerController::class, 'getMyMonthlyStats']);
         Route::get('/statistics/me/yearly', [PartnerController::class, 'getMyYearlyStats']);
+        Route::get('/statistics/me/range', [PartnerController::class, 'getMyRangeStats']);
     });
 
     Route::prefix('/operators')->group(function () {

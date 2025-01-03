@@ -207,4 +207,57 @@ class PartnerController extends Controller
                 ->first()
         ]);
     }
+
+    public function getMyRangeStats()
+    {
+        try {
+            $partnerId = auth('sanctum')->user()->id;
+            $fromDate = request()->get('from');
+            $toDate = request()->get('to');
+
+            if (!$fromDate || !$toDate) {
+                return $this->error('Both from and to dates are required');
+            }
+
+            try {
+                $fromDate = \Carbon\Carbon::createFromFormat('d.m.Y', $fromDate)->startOfDay();
+                $toDate = \Carbon\Carbon::createFromFormat('d.m.Y', $toDate)->endOfDay();
+            } catch (\Exception $e) {
+                return $this->error('Invalid date format. Use dd.mm.yyyy');
+            }
+
+            if ($fromDate->gt($toDate)) {
+                return $this->error('From date cannot be greater than to date');
+            }
+
+            $stats = History::query()
+                ->join('orders', 'histories.order_id', '=', 'orders.id')
+                ->where('orders.partner_id', $partnerId)
+                ->where('histories.status', 2)
+                ->whereBetween('histories.created_at', [$fromDate, $toDate])
+                ->select(
+                    DB::raw('COUNT(*) as total_orders'),
+                    DB::raw('SUM(orders.total_price - orders.delivery_price) as total_earnings'),
+                    DB::raw('AVG(orders.total_price - orders.delivery_price) as average_order_value'),
+                    DB::raw('MIN(histories.created_at) as period_start'),
+                    DB::raw('MAX(histories.created_at) as period_end')
+                )
+                ->first();
+
+            return $this->success([
+                'range_stats' => [
+                    'from_date' => $fromDate->format('Y-m-d'),
+                    'to_date' => $toDate->format('Y-m-d'),
+                    'total_orders' => $stats->total_orders,
+                    'total_earnings' => $stats->total_earnings,
+                    'average_order_value' => $stats->average_order_value,
+                    'period_start' => $stats->period_start,
+                    'period_end' => $stats->period_end
+                ]
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Range stats error: ' . $e->getMessage());
+            return $this->error('Failed to fetch range statistics');
+        }
+    }
 }
