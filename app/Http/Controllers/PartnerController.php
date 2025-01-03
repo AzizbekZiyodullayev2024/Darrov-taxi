@@ -145,7 +145,7 @@ class PartnerController extends Controller
                 ->where('histories.status', 2)
                 ->whereDate('histories.created_at', $date)
                 ->select(
-                    DB::raw('DATE(histories.created_at) as date'),
+                    DB::raw("'" . $date . "' as date"),
                     DB::raw('COUNT(*) as total_orders'),
                     DB::raw('SUM(orders.total_price - orders.delivery_price) as total_earnings'),
                     DB::raw('AVG(orders.total_price - orders.delivery_price) as average_order_value')
