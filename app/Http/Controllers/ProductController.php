@@ -12,7 +12,7 @@ class ProductController extends Controller {
     protected function success($data = [], $message = 'Success', $code = 200)
     {
         return response()->json([
-            'status' => true,
+            'success' => true,
             'data' => $data,
             'msg' => $message,
         ], $code);
