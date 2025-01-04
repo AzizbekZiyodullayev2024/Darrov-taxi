@@ -234,18 +234,20 @@ class DeliveryController extends Controller
 
     public function statDeliveryOverall()
     {
-        $today = now()->format('Y-m-d');  // Today's date in 'Y-m-d' format
-        return response()->json([
-            'success' => true,
-            'data' => [
-                'daily_count' => DB::raw('COUNT(CASE WHEN DATE(orders.updated_at) = DATE(CURDATE()) THEN 1 END) AS daily_count'),
-                'monthly_count' => DB::raw('COUNT(CASE WHEN YEAR(orders.updated_at) = YEAR(CURDATE()) AND MONTH(orders.updated_at) = MONTH(CURDATE()) THEN 1 END) AS monthly_count'),
-                'yearly_count' => DB::raw('COUNT(CASE WHEN YEAR(orders.updated_at) = YEAR(CURDATE()) THEN 1 END) AS yearly_count'),
-                'daily_sum' => DB::raw('SUM(CASE WHEN DATE(orders.updated_at) = DATE(CURDATE()) THEN orders.delivery_price ELSE 0 END) AS daily_sum'),
-                'monthly_sum' => DB::raw('SUM(CASE WHEN YEAR(orders.updated_at) = YEAR(CURDATE()) AND MONTH(orders.updated_at) = MONTH(CURDATE()) THEN orders.delivery_price ELSE 0 END) AS monthly_sum'),
-                'yearly_sum' => DB::raw('SUM(CASE WHEN YEAR(orders.updated_at) = YEAR(CURDATE()) THEN orders.delivery_price ELSE 0 END) AS yearly_sum')
-            ]
-        ]);
+        $stats = Order::query()
+            ->select([
+                DB::raw('COUNT(CASE WHEN DATE(updated_at) = CURDATE() THEN 1 END) as daily_count'),
+                DB::raw('COUNT(CASE WHEN YEAR(updated_at) = YEAR(CURDATE()) AND MONTH(updated_at) = MONTH(CURDATE()) THEN 1 END) as monthly_count'),
+                DB::raw('COUNT(CASE WHEN YEAR(updated_at) = YEAR(CURDATE()) THEN 1 END) as yearly_count'),
+                DB::raw('COALESCE(SUM(CASE WHEN DATE(updated_at) = CURDATE() THEN delivery_price ELSE 0 END), 0) as daily_sum'),
+                DB::raw('COALESCE(SUM(CASE WHEN YEAR(updated_at) = YEAR(CURDATE()) AND MONTH(updated_at) = MONTH(CURDATE()) THEN delivery_price ELSE 0 END), 0) as monthly_sum'),
+                DB::raw('COALESCE(SUM(CASE WHEN YEAR(updated_at) = YEAR(CURDATE()) THEN delivery_price ELSE 0 END), 0) as yearly_sum')
+            ])
+            ->where('status', 4)
+            ->first()
+            ->toArray();
+
+        return response()->json([$stats]);
     }
 
     public function statDeliveryDaily()
