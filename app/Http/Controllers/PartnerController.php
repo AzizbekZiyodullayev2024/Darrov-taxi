@@ -84,9 +84,7 @@ class PartnerController extends Controller
 
     public function statPartnerOverall()
     {
-        $today = now()->format('Y-m-d');
-
-        return $this->indexResponse(History::query()
+        return $this->success(History::query()
             ->join('orders', 'histories.order_id', '=', 'orders.id')
             ->join('partners', 'orders.partner_id', '=', 'partners.id')
             ->select(
