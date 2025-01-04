@@ -41,7 +41,7 @@ class OrderController extends Controller
         if(\request()->has('customer_id')) {
             $query = $query->where('customer_id', \request()->input('customer_id'));
         }
-        $orders = $query->orderBy('created_at')
+        $paginator = $query->orderBy('created_at')
             ->with('items')
             ->with('customer')
             ->with('items.product')
@@ -49,8 +49,13 @@ class OrderController extends Controller
             ->with('driver')
             ->paginate(\request('limit', 20));
 
-        return $this->success([
-            'orders' => $orders
+        return response()->json([
+            'success' => true,
+            'data' => $paginator->items(),
+            'current_page' => $paginator->currentPage(),
+            'last_page' => $paginator->lastPage(),
+            'per_page' => $paginator->perPage(),
+            'total' => $paginator->total()
         ]);
     }
 
