@@ -26,7 +26,7 @@ class ProductController extends Controller {
     public function categoryProducts($partner) {
         return $this->success(
             ['categories' => Category::query()->with('products')->where('partner_id', $partner)->get()],
-            'Categories with products retrieved successfully'
+            'success'
         );
     }
 
