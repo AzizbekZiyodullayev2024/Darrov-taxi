@@ -59,9 +59,8 @@ class PartnerController extends Controller
 
     public function statPartner()
     {
-
         $today = \request()->has('date')?\request()->get('date'):now()->format('Y-m-d');
-        $query=History::query()
+        $query = History::query()
             ->join('orders', 'histories.order_id', '=', 'orders.id')
             ->join('partners', 'orders.partner_id', '=', 'partners.id')
             ->select(
@@ -76,7 +75,7 @@ class PartnerController extends Controller
             )
             ->where('histories.status', 2);
             
-        return $this->indexResponse($query
+        return $this->success($query
             ->groupBy('orders.partner_id', 'partners.name')
             ->paginate(\request()->get('limit', 20))
             ->toArray());
