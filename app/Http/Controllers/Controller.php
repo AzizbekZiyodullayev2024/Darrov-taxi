@@ -2,28 +2,29 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Foundation\Bus\DispatchesJobs;
+use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Routing\Controller as BaseController;
-use App\Http\Services\Response;
-use Illuminate\Support\Facades\File;
 
+class Controller extends BaseController
+{
+    use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
 
-class Controller extends BaseController {
-    use Response;
-
-    protected function validated(Request $request) {
-        return array_filter($request->all(), function($val) {
-            return strlen($val);
-        });
+    protected function success($data = [], $message = 'Success', $code = 200)
+    {
+        return response()->json([
+            'success' => true,
+            'message' => $message,
+            'data' => $data
+        ], $code);
     }
 
-    protected function saveImage($img, $path) {
-        $imageName = time().'.'. $img->extension();
-        $img->move(public_path('storage/' . $path), $imageName);
-        return $imageName;
-    }
-
-    protected function deleteFile($name, $path) {
-        File::delete(public_path("storage/$path/" . $name));
+    protected function error($message = 'Error', $code = 400)
+    {
+        return response()->json([
+            'success' => false,
+            'message' => $message
+        ], $code);
     }
 }
