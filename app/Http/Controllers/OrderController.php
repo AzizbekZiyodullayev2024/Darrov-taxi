@@ -16,41 +16,43 @@ class OrderController extends Controller
 {
     public function index(Partner $partner)
     {
-            $query = Order::query();
-            if (\request()->has('from') && \request()->has('to')) {
-                $from = \request()->input('from');
-                $to = \request()->input('to');
-                $query = $query->whereRaw("date(updated_at)>='{$from}' and date(updated_at)<='{$to}'");
-            }
-            if($partner->id) {
-                $query = $query->where('partner_id', $partner->id);
-                $query = $query->where(function ($query) {
-                    $query->where(function ($query) {
-                        $query->where('payment_type', 0)
-                            ->where('status', '<>', 0);
-                    })
-                        ->orWhere('payment_type', 1);
-                });
-            }
-            if(\request()->has('partner_id')) {
-                $query = $query->where('partner_id', \request()->input('partner_id'));
-            }
-            if(\request()->has('delivery_id')) {
-                $query = $query->where('driver_id', \request()->input('delivery_id'));
-            }
-            if(\request()->has('customer_id')) {
-                $query = $query->where('customer_id', \request()->input('customer_id'));
-            }
-            $query = $query->orderBy('created_at')
-                ->with('items')
-                ->with('customer')
-                ->with('items.product')
-                ->with('partner')
-                ->with('driver')
-            ->paginate(\request('limit', 20))
-            ->toArray();
-            return $this->indexResponse($query);
+        $query = Order::query();
+        if (\request()->has('from') && \request()->has('to')) {
+            $from = \request()->input('from');
+            $to = \request()->input('to');
+            $query = $query->whereRaw("date(updated_at)>='{$from}' and date(updated_at)<='{$to}'");
         }
+        if($partner->id) {
+            $query = $query->where('partner_id', $partner->id);
+            $query = $query->where(function ($query) {
+                $query->where(function ($query) {
+                    $query->where('payment_type', 0)
+                        ->where('status', '<>', 0);
+                })
+                    ->orWhere('payment_type', 1);
+            });
+        }
+        if(\request()->has('partner_id')) {
+            $query = $query->where('partner_id', \request()->input('partner_id'));
+        }
+        if(\request()->has('delivery_id')) {
+            $query = $query->where('driver_id', \request()->input('delivery_id'));
+        }
+        if(\request()->has('customer_id')) {
+            $query = $query->where('customer_id', \request()->input('customer_id'));
+        }
+        $orders = $query->orderBy('created_at')
+            ->with('items')
+            ->with('customer')
+            ->with('items.product')
+            ->with('partner')
+            ->with('driver')
+            ->paginate(\request('limit', 20));
+
+        return $this->success([
+            'orders' => $orders
+        ]);
+    }
 
     public function getOrdersByStatus(Request $request, $customer = null)
     {
