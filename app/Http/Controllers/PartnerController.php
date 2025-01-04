@@ -156,7 +156,14 @@ class PartnerController extends Controller
             ->where('orders.partner_id', $partnerId)
             ->where('histories.status', 2)
             ->whereDate('histories.created_at', $date)
-            ->with(['order.customer', 'order.items', 'order.driver'])
+            ->with([
+                'order.customer', 
+                'order.items' => function($query) {
+                    $query->select('id', 'order_id', 'product_id', 'quantity', 'price')
+                        ->with(['product:id,name,img']);
+                }, 
+                'order.driver'
+            ])
             ->when(request()->has('search'), function($query) {
                 $search = request()->get('search');
                 return $query->where(function($q) use ($search) {
@@ -228,7 +235,14 @@ class PartnerController extends Controller
             ->first();
         
         $orders = History::query()
-            ->with(['order.items', 'order.driver'])
+            ->with([
+                'order.items' => function($query) {
+                    $query->select('id', 'order_id', 'product_id', 'quantity', 'price')
+                        ->with(['product:id,name,img']);
+                },
+                'order.driver',
+                'order.customer'
+            ])
             ->join('orders', 'histories.order_id', '=', 'orders.id')
             ->where('orders.partner_id', $partnerId)
             ->whereYear('histories.created_at', $year)
@@ -283,7 +297,14 @@ class PartnerController extends Controller
                 ->where('orders.partner_id', $partnerId)
                 ->where('histories.status', 2)
                 ->whereBetween('histories.created_at', [$fromDate, $toDate])
-                ->with(['order.customer', 'order.items', 'order.driver'])
+                ->with([
+                    'order.customer',
+                    'order.items' => function($query) {
+                        $query->select('id', 'order_id', 'product_id', 'quantity', 'price')
+                            ->with(['product:id,name,img']);
+                    },
+                    'order.driver'
+                ])
                 ->when(request()->has('search'), function($query) {
                     $search = request()->get('search');
                     return $query->where(function($q) use ($search) {
