@@ -138,7 +138,6 @@ class PartnerController extends Controller
             }
         }
 
-        // Get stats
         $stats = History::query()
             ->join('orders', 'histories.order_id', '=', 'orders.id')
             ->where('orders.partner_id', $partnerId)
@@ -152,13 +151,12 @@ class PartnerController extends Controller
             )
             ->first();
 
-        // Get orders with pagination
         $orders = History::query()
             ->join('orders', 'histories.order_id', '=', 'orders.id')
             ->where('orders.partner_id', $partnerId)
             ->where('histories.status', 2)
             ->whereDate('histories.created_at', $date)
-            ->with(['order.customer']) // Assuming you have these relationships set up
+            ->with(['order.customer', 'order.items', 'order.driver'])
             ->when(request()->has('search'), function($query) {
                 $search = request()->get('search');
                 return $query->where(function($q) use ($search) {
@@ -216,19 +214,31 @@ class PartnerController extends Controller
             return $this->error('Invalid year specified');
         }
         
+        $stats = History::query()
+            ->join('orders', 'histories.order_id', '=', 'orders.id')
+            ->where('orders.partner_id', $partnerId)
+            ->whereYear('histories.created_at', $year)
+            ->select(
+                DB::raw('YEAR(histories.created_at) as year'),
+                DB::raw('COUNT(*) as total_orders'),
+                DB::raw('SUM(orders.total_price - orders.delivery_price) as total_earnings'),
+                DB::raw('AVG(orders.total_price - orders.delivery_price) as average_order_value')
+            )
+            ->where('histories.status', 2)
+            ->first();
+        
+        $orders = History::query()
+            ->with(['order.items', 'order.driver'])
+            ->join('orders', 'histories.order_id', '=', 'orders.id')
+            ->where('orders.partner_id', $partnerId)
+            ->whereYear('histories.created_at', $year)
+            ->where('histories.status', 2)
+            ->orderBy('histories.created_at', 'desc')
+            ->paginate(request()->get('limit', 15));
+        
         return $this->success([
-            'yearly_stats' => History::query()
-                ->join('orders', 'histories.order_id', '=', 'orders.id')
-                ->where('orders.partner_id', $partnerId)
-                ->whereYear('histories.created_at', $year)
-                ->select(
-                    DB::raw('YEAR(histories.created_at) as year'),
-                    DB::raw('COUNT(*) as total_orders'),
-                    DB::raw('SUM(orders.total_price - orders.delivery_price) as total_earnings'),
-                    DB::raw('AVG(orders.total_price - orders.delivery_price) as average_order_value')
-                )
-                ->where('histories.status', 2)
-                ->first()
+            'yearly_stats' => $stats,
+            'orders' => $orders
         ]);
     }
 
@@ -254,7 +264,6 @@ class PartnerController extends Controller
                 return $this->error('From date cannot be greater than to date');
             }
 
-            // Get stats
             $stats = History::query()
                 ->join('orders', 'histories.order_id', '=', 'orders.id')
                 ->where('orders.partner_id', $partnerId)
@@ -269,13 +278,12 @@ class PartnerController extends Controller
                 )
                 ->first();
 
-            // Get orders with pagination
             $orders = History::query()
                 ->join('orders', 'histories.order_id', '=', 'orders.id')
                 ->where('orders.partner_id', $partnerId)
                 ->where('histories.status', 2)
                 ->whereBetween('histories.created_at', [$fromDate, $toDate])
-                ->with(['order.customer']) // Assuming you have these relationships set up
+                ->with(['order.customer', 'order.items', 'order.driver'])
                 ->when(request()->has('search'), function($query) {
                     $search = request()->get('search');
                     return $query->where(function($q) use ($search) {
