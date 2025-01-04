@@ -9,12 +9,12 @@ use App\Models\Product;
 
 class ProductController extends Controller {
 
-    protected function success($data = [], $code = 200)
+    protected function success($data = [], $message = 'Success', $code = 200)
     {
         return response()->json([
             'status' => true,
             'data' => $data,
-            'msg' => $data['msg'] ?? null,
+            'msg' => $message,
         ], $code);
     }
 
@@ -24,10 +24,10 @@ class ProductController extends Controller {
     }
 
     public function categoryProducts($partner) {
-        return $this->success([
-            'categories' => Category::query()->with('products')->where('partner_id', $partner)->get(),
-            'msg' => 'Categories with products retrieved successfully'
-        ]);
+        return $this->success(
+            ['categories' => Category::query()->with('products')->where('partner_id', $partner)->get()],
+            'Categories with products retrieved successfully'
+        );
     }
 
     public function store(ProductRequest $request) {
