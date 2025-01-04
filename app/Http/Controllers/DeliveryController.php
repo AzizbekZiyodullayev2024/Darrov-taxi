@@ -209,7 +209,8 @@ class DeliveryController extends Controller
 
     public function statDelivery()
     {
-        $stats = Order::query()
+        $limit = request()->get('limit', 20);
+        $query = Order::query()
             ->join('delivery', 'orders.driver_id', '=', 'delivery.id')
             ->select(
                 'orders.driver_id',
@@ -217,18 +218,22 @@ class DeliveryController extends Controller
                 DB::raw('COUNT(CASE WHEN DATE(orders.updated_at) = DATE(CURDATE()) THEN 1 END) AS daily_count'),
                 DB::raw('COUNT(CASE WHEN YEAR(orders.updated_at) = YEAR(CURDATE()) AND MONTH(orders.updated_at) = MONTH(CURDATE()) THEN 1 END) AS monthly_count'),
                 DB::raw('COUNT(CASE WHEN YEAR(orders.updated_at) = YEAR(CURDATE()) THEN 1 END) AS yearly_count'),
-                DB::raw('SUM(CASE WHEN DATE(orders.updated_at) = DATE(CURDATE()) THEN orders.delivery_price ELSE 0 END) AS daily_sum'),
-                DB::raw('SUM(CASE WHEN YEAR(orders.updated_at) = YEAR(CURDATE()) AND MONTH(orders.updated_at) = MONTH(CURDATE()) THEN orders.delivery_price ELSE 0 END) AS monthly_sum'),
-                DB::raw('SUM(CASE WHEN YEAR(orders.updated_at) = YEAR(CURDATE()) THEN orders.delivery_price ELSE 0 END) AS yearly_sum')
+                DB::raw('COALESCE(SUM(CASE WHEN DATE(orders.updated_at) = DATE(CURDATE()) THEN orders.delivery_price ELSE 0 END), 0) AS daily_sum'),
+                DB::raw('COALESCE(SUM(CASE WHEN YEAR(orders.updated_at) = YEAR(CURDATE()) AND MONTH(orders.updated_at) = MONTH(CURDATE()) THEN orders.delivery_price ELSE 0 END), 0) AS monthly_sum'),
+                DB::raw('COALESCE(SUM(CASE WHEN YEAR(orders.updated_at) = YEAR(CURDATE()) THEN orders.delivery_price ELSE 0 END), 0) AS yearly_sum')
             )
-            ->where(['orders.status' => 4])
-            ->groupBy('orders.driver_id', 'delivery.name')
-            ->paginate(\request()->get('limit', 20))
-            ->toArray();
+            ->where('orders.status', 4)
+            ->groupBy('orders.driver_id', 'delivery.name');
+
+        $stats = $query->paginate($limit);
 
         return response()->json([
             'success' => true,
-            'data' => $stats
+            'data' => $stats->items(),
+            'current_page' => $stats->currentPage(),
+            'last_page' => $stats->lastPage(),
+            'per_page' => $stats->perPage(),
+            'total' => $stats->total()
         ]);
     }
 
