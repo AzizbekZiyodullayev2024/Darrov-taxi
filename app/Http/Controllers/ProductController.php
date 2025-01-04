@@ -16,7 +16,8 @@ class ProductController extends Controller {
 
     public function categoryProducts($partner) {
         return $this->success([
-            'categories' => Category::query()->with('products')->where('partner_id', $partner)->get()
+            'categories' => Category::query()->with('products')->where('partner_id', $partner)->get(),
+            'msg' => 'Categories with products retrieved successfully'
         ]);
     }
 
@@ -26,7 +27,7 @@ class ProductController extends Controller {
             $data['img'] = $this->saveImage($request->file('img'), 'products');
 
         $product = Product::query()->create($data);
-        return $this->success(['product' => $product]);
+        return $this->success(['product' => $product, 'msg' => 'Product created successfully']);
     }
 
     public function update(ProductRequest $request, Product $product) {
@@ -39,11 +40,11 @@ class ProductController extends Controller {
             $data['status']=1;
         }
         $product->update($data);
-        return $this->success(['product' => $product]);
+        return $this->success(['product' => $product, 'msg' => 'Product updated successfully']);
     }
 
     public function destroy(Product $product) {
         $product->delete();
-        return $this->success([]);
+        return $this->success(['msg' => 'Product deleted successfully']);
     }
 }
