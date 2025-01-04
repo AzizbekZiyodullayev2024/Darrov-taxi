@@ -9,6 +9,15 @@ use App\Models\Product;
 
 class ProductController extends Controller {
 
+    protected function success($data = [], $code = 200)
+    {
+        return response()->json([
+            'status' => true,
+            'data' => $data,
+            'msg' => $data['msg'] ?? null,
+        ], $code);
+    }
+
     public function index(Request $request) {
         $category = Category::query()->findOrFail($request->category_id);
         return $this->success(['products' => $category->products]);
