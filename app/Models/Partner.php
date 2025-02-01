@@ -15,6 +15,7 @@ class Partner extends Model {
 
     protected $fillable = [
         'name', 'username', 'password', 'start_time', 'end_time', 'address', 'phone', 'img', 'longitude', 'latitude','open'
+        ,'position'
     ];
 
     protected $hidden = [
