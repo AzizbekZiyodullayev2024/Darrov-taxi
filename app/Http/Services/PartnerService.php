@@ -33,7 +33,7 @@ class PartnerService extends CRUDService
 
     public function publicAll()
     {
-        return $this->success(['partners' => Partner::all()]);
+        return $this->success(['partners' => Partner::query()->orderBy('position')->get()->all()]);
     }
 
     public function updateImage(Partner $partner, \App\Http\Requests\PartnerUpdateRequest $request)

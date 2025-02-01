@@ -35,6 +35,7 @@ class PartnerUpdateRequest extends BaseRequest
             'longitude' => '',
             'latitude' => '',
             'open' => 'nullable|boolean',
+            'position' => 'nullable|numeric'
         ];
     }
 }
