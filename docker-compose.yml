@@ -40,9 +40,10 @@ services:
         volumes:
             - ./docker/mysql:/var/lib/mysql
         environment:
-            - MYSQL_ROOT_PASSWORD=secret
+            - MYSQL_ROOT_PASSWORD=root
+            - MYSQL_DATABASE=taxi_db   # bazani yaratib beradi
         ports:
-            - "3306:3306"
+            - "3310:3306"
         networks:
             - laravel
         restart: unless-stopped

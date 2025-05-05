@@ -143,7 +143,6 @@ Route::post('/client/verify', [AuthController::class, 'verifyClient']);
 
 Route::post('/receive-status', [AuthController::class, 'receive'])->name('receive_status');
 
-
 /* Any route */
 Route::any('/{all?}', function () {
     return response()->json([
